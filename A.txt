@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/player.py", line 428, in <module>
+    run_bot(Player(), parse_args())
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/skeleton/runner.py", line 145, in run_bot
+    runner.run()
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/skeleton/runner.py", line 120, in run
+    action = self.pokerbot.get_action(game_state, round_state, active)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/player.py", line 388, in get_action
+    action_to_take = next_action(self.my_synergy, self.opp_synergy, min_raise, pot)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/player.py", line 214, in next_action
+    return random.choices([FOLD, CALL, RAISE, BIG_RAISE], next_action_weights(my_synergy, opp_synergy, min_raise_amount, pot))[0]
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/player.py", line 206, in next_action_weights
+    return softmax([
+           ^^^^^^^^^
+  File "/Users/margaritacarranza/pokerbots/bot-1/opponent_bot/player.py", line 45, in softmax
+    exp_weights = [math.exp(weight) for weight in weights]
+                   ^^^^^^^^^^^^^^^^
+OverflowError: math range error

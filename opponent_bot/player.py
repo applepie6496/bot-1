@@ -7,7 +7,8 @@ from skeleton.states import NUM_ROUNDS, STARTING_STACK, BIG_BLIND, SMALL_BLIND
 from skeleton.bot import Bot
 from skeleton.runner import parse_args, run_bot
 
-from helper import choose_discard, get_betting_action
+import random
+from helper import *
 
 
 class Player(Bot):
@@ -99,24 +100,43 @@ class Player(Bot):
         # the number of chips your opponent has contributed to the pot
         opp_contribution = STARTING_STACK - opp_stack
 
-        # Handle discard phase (streets 2 and 3)
+        winning_p, discard_idx = estimate_winning_p(my_cards, board_cards, game_state.game_clock)
+
+        # Only use DiscardAction if it's in legal_actions (which already checks street)
+        # legal_actions() returns DiscardAction only when street is 2 or 3
+        pot = my_contribution + opp_contribution
+        pot_odds = continue_cost / (pot + continue_cost) if continue_cost > 0 else 0.0
+
+        value_threshold = 0.65
+        call_margin = 0.02
+        bluff_freq = 0.08
+
         if DiscardAction in legal_actions:
-            discard_index = choose_discard(my_cards)
-            return DiscardAction(discard_index)
+            return DiscardAction(discard_idx)
 
-        # Get betting decision from helper function
-        action = get_betting_action(my_cards, board_cards, street, continue_cost, my_stack, legal_actions)
+        if continue_cost > 0:
+            if winning_p + call_margin < pot_odds:
+                return FoldAction()
 
-        # Execute the action
-        if action == 'raise':
-            min_raise, max_raise = round_state.raise_bounds()
-            return RaiseAction(min_raise)
-        elif action == 'call':
+            if RaiseAction in legal_actions and winning_p > value_threshold:
+                min_raise, max_raise = round_state.raise_bounds()
+                target = min_raise
+                return RaiseAction(target)
+
             return CallAction()
-        elif action == 'check':
+
+        else:
+            if RaiseAction in legal_actions and winning_p > value_threshold:
+                min_raise, max_raise = round_state.raise_bounds()
+                target = min_raise
+                return RaiseAction(target)
+
+            if RaiseAction in legal_actions and winning_p < 0.40 and random.random() < bluff_freq:
+                min_raise, max_raise = round_state.raise_bounds()
+                target = min_raise
+                return RaiseAction(target)
+
             return CheckAction()
-        else:  # fold
-            return FoldAction()
 
 
 if __name__ == '__main__':
